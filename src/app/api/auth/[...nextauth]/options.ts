@@ -1,12 +1,11 @@
 import { NextAuthOptions } from "next-auth";
-import { PrismaAdapter } from "@auth/prisma-adapter";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
-import prisma from "@/lib/prisma"; // Adjust the import path as needed
-import bcrypt from 'bcryptjs';
+import bcrypt from "bcryptjs";
+import dbConnect from "@/lib/dbConnect";
+import User from "@/models/User";
 
 export const options: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma) as any, // Use type assertion cautiously
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID as string,
@@ -18,16 +17,15 @@ export const options: NextAuthOptions = {
         email: { label: "Email", type: "email", placeholder: "hello@example.com" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials, req) {
+      async authorize(credentials) {
         if (!credentials) {
           throw new Error("No credentials provided");
         }
 
         const { email, password } = credentials;
 
-        const user = await prisma.user.findUnique({
-          where: { email: email },
-        });
+        await dbConnect();
+        const user = await User.findOne({ email });
 
         if (!user) {
           throw new Error("No user found with the provided email");
@@ -36,7 +34,7 @@ export const options: NextAuthOptions = {
         const passwordMatch = await bcrypt.compare(password, user.password);
 
         if (passwordMatch) {
-          return user;
+          return user.toObject(); // Convert Mongoose document to plain JavaScript object
         } else {
           throw new Error("Invalid credentials");
         }
@@ -47,6 +45,6 @@ export const options: NextAuthOptions = {
     strategy: "jwt",
   },
   pages: {
-    signIn: '/login',
-  }
+    signIn: "/login",
+  },
 };

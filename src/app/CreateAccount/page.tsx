@@ -33,9 +33,8 @@ const CreateAccount: React.FC = () => {
     };
 
     return (
-
         <div>
-            <section className="bg-white">
+            <section className="bg-primary">
                 <div className="lg:grid lg:min-h-screen lg:grid-cols-12">
                     <aside className="relative block h-16 lg:order-last lg:col-span-5 lg:h-full xl:col-span-6">
                         <img
@@ -46,14 +45,14 @@ const CreateAccount: React.FC = () => {
                     </aside>
 
                     <main
-                        className="flex items-center justify-center px-8 py-8 sm:px-12 lg:col-span-7 lg:px-16 lg:py-12 xl:col-span-6"
+                        className="flex items-center justify-center px-md py-md sm:px-lg lg:col-span-7 lg:px-lg lg:py-lg xl:col-span-6"
                     >
                         <div className="flex justify-center items-center">
-                            <div className="w-full max-w-md p-6 bg-white shadow-md rounded-lg">
-                                <h2 className="text-2xl font-bold mb-4 text-center">Create Account</h2>
-                                {error && <p className="text-red-500 text-center mb-4">{error}</p>}
-                                <div className='items-center mt-5'>
-                                    <form onSubmit={handleSubmit} className="space-y-4">
+                            <div className="w-full max-w-md p-md bg-primary shadow-md rounded-lg">
+                                <h2 className="text-2xl font-bold mb-md text-center">Create Account</h2>
+                                {error && <p className="text-red-500 text-center mb-md">{error}</p>}
+                                <div className='items-center mt-md'>
+                                    <form onSubmit={handleSubmit} className="space-y-md">
                                         <div>
                                             <Label htmlFor='name' className="block text-sm font-medium text-gray-700">Name</Label>
                                             <Input
@@ -62,7 +61,9 @@ const CreateAccount: React.FC = () => {
                                                 value={name}
                                                 onChange={(e) => setName(e.target.value)}
                                                 required
-                                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                                className="mt-xs block w-full px-md py-sm border 
+                                                border-gray-300 rounded-md shadow-sm focus:outline-none 
+                                                focus:ring-secondary focus:border-secondary sm:text-sm"
                                             />
                                         </div>
                                         <div>
@@ -73,7 +74,8 @@ const CreateAccount: React.FC = () => {
                                                 value={email}
                                                 onChange={(e) => setEmail(e.target.value)}
                                                 required
-                                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                                className="mt-xs block w-full px-md py-sm border border-gray-300 
+                                                rounded-md shadow-sm focus:outline-none focus:ring-secondary focus:border-secondary sm:text-sm"
                                             />
                                         </div>
                                         <div>
@@ -84,14 +86,14 @@ const CreateAccount: React.FC = () => {
                                                 value={password}
                                                 onChange={(e) => setPassword(e.target.value)}
                                                 required
-                                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                                className="mt-xs block w-full px-md py-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-secondary focus:border-secondary sm:text-sm"
                                             />
                                         </div>
 
-                                        <Button variant="outline" className='w-full py-2 px-4 bg-blue-500 border 
-                                                                  text-white font-semibold rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none 
-                                                                  focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2'> Submit</Button>
-
+                                        <Button className='w-full py-md px-lg bg-secondary border text-white 
+                                        font-semibold rounded-md
+                                        shadow-sm hover:bg-hover focus:outline-none focus:ring-2 
+                                        focus:ring-secondary focus:ring-offset-2'> Submit</Button>
                                     </form>
                                 </div>
                             </div>
@@ -102,6 +104,5 @@ const CreateAccount: React.FC = () => {
         </div>
     );
 };
-
 
 export default CreateAccount;
