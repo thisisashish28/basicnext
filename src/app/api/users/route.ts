@@ -1,4 +1,4 @@
-import { createUserWithAccount, getUserByEmail } from "@/utils/users"; // Corrected import
+import { createUserWithAccount, getUserByEmail } from "@/utils/users";
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 
@@ -18,9 +18,19 @@ interface ResponseData {
 export const POST = async (req: Request): Promise<NextResponse> => {
   try {
     const { name, email, password }: RequestBody = await req.json();
+    console.log(name,email,password);
+    // Validate input
+    if (!name || !email || !password) {
+      return NextResponse.json(
+        {
+          message: "All fields are required.",
+        },
+        { status: 400 }
+      );
+    }
 
     // Check if user already exists
-    const existingUser = await getUserByEmail(email); // Removed destructuring from function parameter
+    const existingUser = await getUserByEmail(email);
     if (existingUser) {
       return NextResponse.json(
         {
@@ -46,8 +56,8 @@ export const POST = async (req: Request): Promise<NextResponse> => {
       },
       { status: 201 }
     );
-  } catch (error) {
-    console.error("Error in POST handler:", error);
+  } catch (error:any) {
+    console.log("Error in POST handler:", error) ;
     return NextResponse.json(
       {
         message: "Error",
@@ -55,5 +65,6 @@ export const POST = async (req: Request): Promise<NextResponse> => {
       },
       { status: 500 }
     );
+   // console.log(error);
   }
 };

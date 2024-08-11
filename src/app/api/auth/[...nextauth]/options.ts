@@ -4,6 +4,8 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import dbConnect from "@/lib/dbConnect";
 import User from "@/models/User";
+import { generateToken } from "./utils/jwtUtils";
+import { NextResponse } from "next/server";
 
 export const options: NextAuthOptions = {
   providers: [
@@ -17,13 +19,12 @@ export const options: NextAuthOptions = {
         email: { label: "Email", type: "email", placeholder: "hello@example.com" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials) {
+      async authorize(credentials, req) {
         if (!credentials) {
           throw new Error("No credentials provided");
         }
 
         const { email, password } = credentials;
-
         await dbConnect();
         const user = await User.findOne({ email });
 
@@ -32,9 +33,13 @@ export const options: NextAuthOptions = {
         }
 
         const passwordMatch = await bcrypt.compare(password, user.password);
+        const token = generateToken({ id: user._id, email: user.email });
+        const response = user.toObject();
+        response.token = token;
 
         if (passwordMatch) {
-          return user.toObject(); // Convert Mongoose document to plain JavaScript object
+
+          return response;
         } else {
           throw new Error("Invalid credentials");
         }
@@ -46,5 +51,28 @@ export const options: NextAuthOptions = {
   },
   pages: {
     signIn: "/login",
+  },
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user._id;
+        token.customToken = user.token;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      session.user.id = token.id;
+      session.user.customToken = token.customToken;
+      return session;
+    },
+  },
+  events: {
+    async signIn({ user }) {
+      if (user) {
+        // You can set the custom token in a cookie here.
+        const res = NextResponse.next();
+        res.cookies.set('customToken', user.token);
+      }
+    },
   },
 };

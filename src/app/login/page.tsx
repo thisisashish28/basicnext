@@ -1,30 +1,43 @@
 "use client";
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import axios from 'axios';
 import { signIn, useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import React, { useState, FormEvent } from 'react';
+import React, { useState, FormEvent, useEffect } from 'react';
 
 function Login() {
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
     const [error, setError] = useState<string>('');
     const router = useRouter();
+    const { data: session, status } = useSession();
 
-    const { status } = useSession();
-
-    if (status === 'authenticated') {
-        router.push('/');
-    }
+    useEffect(() => {
+        if (status === 'authenticated') {
+            const token = session?.user?.customToken;
+            if (token) {
+                axios.post('/api/set-cookies', { token }, { withCredentials: true })
+                    .then(() => {
+                        router.push('/');
+                    })
+                    .catch(err => {
+                        console.error('Failed to set cookies:', err);
+                        setError('Failed to set cookies.');
+                    });
+            }
+        }
+    }, [status]);
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         const result = await signIn("credentials", { email, password, redirect: false });
-        if (result && result.error) {
+        if (result?.ok && result?.token) {
+            // The token is processed in the useEffect
+        } else if (result?.error) {
             setError("Invalid Email/password");
-        } else {
-            router.push('/');
         }
     };
 

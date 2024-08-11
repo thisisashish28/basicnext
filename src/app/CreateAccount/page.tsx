@@ -22,6 +22,7 @@ const CreateAccount: React.FC = () => {
                 email,
                 password
             });
+            console.log(response.data);
             router.push('/');
         } catch (error: any) {
             if (error.response && error.response.status === 400) {
