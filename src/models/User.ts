@@ -1,17 +1,15 @@
-import mongoose, { Schema, Document, Model } from "mongoose";
+import mongoose, { Document, Schema } from "mongoose";
 
-export interface IUser extends Document {
-  name: string;
+interface IUser extends Document {
   email: string;
   password: string;
+  loggedin?: Date; // Change to Date for TTL indexing
 }
 
-const UserSchema: Schema<IUser> = new Schema({
-  name: { type: String, required: true },
+const UserSchema: Schema = new Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
+  loggedin: { type: Date, expires: 3600 }, // TTL index set to 1 hour
 });
 
-const User: Model<IUser> = mongoose.models.User || mongoose.model<IUser>("User", UserSchema);
-
-export default User;
+export default mongoose.models.User || mongoose.model<IUser>("User", UserSchema);

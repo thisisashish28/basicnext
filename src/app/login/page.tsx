@@ -35,7 +35,6 @@ function Login() {
         e.preventDefault();
         const result = await signIn("credentials", { email, password, redirect: false });
         if (result?.ok && result?.token) {
-            // The token is processed in the useEffect
         } else if (result?.error) {
             setError("Invalid Email/password");
         }

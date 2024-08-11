@@ -4,8 +4,8 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import dbConnect from "@/lib/dbConnect";
 import User from "@/models/User";
-import { generateToken } from "./utils/jwtUtils";
 import { NextResponse } from "next/server";
+
 
 export const options: NextAuthOptions = {
   providers: [
@@ -25,23 +25,40 @@ export const options: NextAuthOptions = {
         }
 
         const { email, password } = credentials;
-        await dbConnect();
-        const user = await User.findOne({ email });
-
-        if (!user) {
-          throw new Error("No user found with the provided email");
-        }
-
-        const passwordMatch = await bcrypt.compare(password, user.password);
-        const token = generateToken({ id: user._id, email: user.email });
-        const response = user.toObject();
-        response.token = token;
-
-        if (passwordMatch) {
-
-          return response;
-        } else {
-          throw new Error("Invalid credentials");
+        console.log(email, password);
+        try {
+          await dbConnect();
+          const user = await User.findOne({ email });
+      
+          if (!user) {
+            throw new Error("No user found with the provided email");
+          }
+      
+          const passwordMatch = await bcrypt.compare(password, user.password);
+          const currentDate = new Date();
+          const token = currentDate;
+          console.log("Generated Token:", token);
+      
+          if (passwordMatch) {
+           // Get current date and time
+            const updateResult = await User.updateOne({ email }, { 
+              loggedin: currentDate // Set the loggedin field to the current date
+            });
+            console.log("Update Result:", updateResult);
+      
+            if (updateResult.modifiedCount === 0) {
+              console.error("Failed to update the `loggedin` field.");
+            }
+      
+            const response = user.toObject();
+            response.token = token;
+            return response;
+          } else {
+            throw new Error("Invalid credentials");
+          }
+        } catch (error) {
+          console.error("Error during authorization:", error);
+          throw new Error("An error occurred during authorization.");
         }
       },
     }),
@@ -76,3 +93,4 @@ export const options: NextAuthOptions = {
     },
   },
 };
+
