@@ -3,6 +3,7 @@ import { serialize } from 'cookie';
 import LogInInform from '@/models/LogInInform';
 import  dbConnect  from '@/lib/dbConnect';
 import { v4 as uuidv4 } from 'uuid';
+import User from "@/models/User";
 
 export async function POST(req: Request) {
   try {
@@ -10,8 +11,9 @@ export async function POST(req: Request) {
     const { email } = await req.json();
     const token = uuidv4();
 
-    if (!email) {
-      return NextResponse.json({ error: 'Token and email are required' }, { status: 400 });
+    const user = await User.findOne({ email });
+    if (!email || !user) {
+      return NextResponse.json({ error: 'Token and email are required or the email you entered is not registered' }, { status: 400 });
     }
 
     // Check if the document already exists
@@ -38,7 +40,7 @@ export async function POST(req: Request) {
       path: '/',
     });
 
-    const response = NextResponse.json({ success: true });
+    const response = NextResponse.json({ success: true, token });
     response.headers.set('Set-Cookie', cookie);
 
     return response;
