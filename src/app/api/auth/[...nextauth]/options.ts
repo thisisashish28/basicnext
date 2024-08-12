@@ -4,8 +4,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import dbConnect from "@/lib/dbConnect";
 import User from "@/models/User";
-import { NextResponse } from "next/server";
-
+import axios from "axios";
 
 export const options: NextAuthOptions = {
   providers: [
@@ -19,43 +18,37 @@ export const options: NextAuthOptions = {
         email: { label: "Email", type: "email", placeholder: "hello@example.com" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials, req) {
+      async authorize(credentials) {
         if (!credentials) {
           throw new Error("No credentials provided");
         }
 
         const { email, password } = credentials;
-        console.log(email, password);
+
         try {
           await dbConnect();
           const user = await User.findOne({ email });
-      
+
           if (!user) {
             throw new Error("No user found with the provided email");
           }
-      
+
           const passwordMatch = await bcrypt.compare(password, user.password);
-          const currentDate = new Date();
-          const token = currentDate;
-          console.log("Generated Token:", token);
-      
-          if (passwordMatch) {
-           // Get current date and time
-            const updateResult = await User.updateOne({ email }, { 
-              loggedin: currentDate // Set the loggedin field to the current date
-            });
-            console.log("Update Result:", updateResult);
-      
-            if (updateResult.modifiedCount === 0) {
-              console.error("Failed to update the `loggedin` field.");
-            }
-      
-            const response = user.toObject();
-            response.token = token;
-            return response;
-          } else {
+
+          if (!passwordMatch) {
             throw new Error("Invalid credentials");
           }
+
+          // Set cookies or perform other actions here
+          const response = await axios.post("http://localhost:3000/api/set-cookies", { email: user.email }, {
+            withCredentials: true,
+          });
+
+          return {
+            id: user._id.toString(),
+            email: user.email,
+            customData: response.data,
+          };
         } catch (error) {
           console.error("Error during authorization:", error);
           throw new Error("An error occurred during authorization.");
@@ -70,27 +63,41 @@ export const options: NextAuthOptions = {
     signIn: "/login",
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async signIn({ account, profile }) {
+      if (account?.provider === "google" && profile?.email) {
+        try {
+          const response = await axios.post("http://localhost:3000/api/set-cookies", { email: profile.email }, {
+            withCredentials: true,
+          });
+          // Attach custom data
+          profile.customData = response.data;
+        } catch (error) {
+          console.error("Error during Google sign-in:", error);
+          return false;
+        }
+      }
+      return true;
+    },
+  
+    async jwt({ token, account, profile, user }) {
+      if (account?.provider === "google" && profile?.customData) {
+        token.customData = profile.customData;
+      }
       if (user) {
-        token.id = user._id;
-        token.customToken = user.token;
+        token.id = user.id;
+        token.customToken = user.customData?.token;
       }
       return token;
     },
+  
     async session({ session, token }) {
-      session.user.id = token.id;
-      session.user.customToken = token.customToken;
+      if (session.user) {
+        session.user.customToken = token.customToken as string;
+      }
+      if (token?.customData) {
+        session.customData = token.customData;
+      }
       return session;
     },
   },
-  events: {
-    async signIn({ user }) {
-      if (user) {
-        // You can set the custom token in a cookie here.
-        const res = NextResponse.next();
-        res.cookies.set('customToken', user.token);
-      }
-    },
-  },
 };
-
