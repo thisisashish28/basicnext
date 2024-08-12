@@ -11,8 +11,8 @@ export async function POST(req: Request) {
     const { email } = await req.json();
     const token = uuidv4();
 
-    const user = await User.findOne({ email });
-    if (!email || !user) {
+    // const user = await User.findOne({ email });
+    if (!email) {
       return NextResponse.json({ error: 'Token and email are required or the email you entered is not registered' }, { status: 400 });
     }
 
@@ -40,8 +40,10 @@ export async function POST(req: Request) {
       path: '/',
     });
 
-    const response = NextResponse.json({ success: true, token });
+    console.log('Setting cookie:', cookie);
+    const response = NextResponse.json({ success: true, token, cookie });
     response.headers.set('Set-Cookie', cookie);
+
 
     return response;
   } catch (error) {

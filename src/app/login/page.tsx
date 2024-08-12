@@ -18,27 +18,27 @@ function Login() {
     useEffect(() => {
         if (status === 'authenticated') {
             const email = session?.user?.email;
-            if (email) {
-                axios.post('/api/set-cookies', { email }, { withCredentials: true })
-                    .then(() => {
+            console.log(session);
                         router.push('/');
-                    })
-                    .catch(err => {
-                        console.error('Failed to set cookies:', err);
-                        setError('Failed to set cookies.');
-                    });
-            }
         }
     }, [status]);
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         const result = await signIn("credentials", { email, password, redirect: false });
-        if (result?.ok && result?.token) {
+        console.log(result);
+        if (result.ok ) {
+            // router.push('/');
         } else if (result?.error) {
             setError("Invalid Email/password");
         }
     };
+
+    const signInwithGoogle = () => {
+       const result = signIn('google');
+       console.log(result);
+       router.push('/');
+    }
 
     return (
         <div>
@@ -95,7 +95,7 @@ function Login() {
                                     <h3 className="text-gray-500">OR</h3>
                                 </div>
                                 <div className="mt-md">
-                                    <Button onClick={() => signIn('google')} className="w-full py-md px-lg bg-white 
+                                    <Button onClick={signInwithGoogle} className="w-full py-md px-lg bg-white 
                                     border border-gray-300 rounded-md shadow-sm 
                                         hover:bg-gray-50 focus:outline-none focus:ring-2 
                                         focus:ring-secondary focus:ring-offset-2 flex items-center justify-center 
