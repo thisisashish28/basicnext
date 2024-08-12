@@ -7,7 +7,6 @@ import { signIn, useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useState, FormEvent, useEffect } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 
 function Login() {
     const [email, setEmail] = useState<string>('');
@@ -18,11 +17,9 @@ function Login() {
 
     useEffect(() => {
         if (status === 'authenticated') {
-            const token = uuidv4();
-            console.log("Token:", token);
             const email = session?.user?.email;
-            if (token) {
-                axios.post('/api/set-cookies', { token, email }, { withCredentials: true })
+            if (email) {
+                axios.post('/api/set-cookies', { email }, { withCredentials: true })
                     .then(() => {
                         router.push('/');
                     })

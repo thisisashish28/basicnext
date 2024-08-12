@@ -2,13 +2,15 @@ import { NextResponse } from 'next/server';
 import { serialize } from 'cookie';
 import LogInInform from '@/models/LogInInform';
 import  dbConnect  from '@/lib/dbConnect';
+import { v4 as uuidv4 } from 'uuid';
 
 export async function POST(req: Request) {
   try {
     await dbConnect();
-    const { token, email } = await req.json();
+    const { email } = await req.json();
+    const token = uuidv4();
 
-    if (!token || !email) {
+    if (!email) {
       return NextResponse.json({ error: 'Token and email are required' }, { status: 400 });
     }
 
