@@ -1,18 +1,11 @@
-import { NextResponse } from 'next/server';
-import nodemailer from 'nodemailer';
-import otpGenerator from 'otp-generator';
-//import { storeOtpAndUserDetails } from '@/utils/otpStore';
-import {storeOtpAndUserDetails} from '../utils/otpStore'
-import { setOtp } from '@/server/controllers/users';
-
-interface RequestBody {
-  name: string;
-  email: string;
-}
+import { NextResponse } from "next/server";
+import nodemailer from "nodemailer";
+import otpGenerator from "otp-generator";
+import { setOtp } from "@/server/controllers/users";
 
 export async function POST(req: Request): Promise<NextResponse> {
   try {
-    const { email }: RequestBody = await req.json();
+    const { email } = await req.json();
 
     // Validate input
     if (!email) {
@@ -26,34 +19,31 @@ export async function POST(req: Request): Promise<NextResponse> {
     // const otp = otpGenerator.generate(6, { upperCaseAlphabets: false, specialChars: false });
     const otp: string = otpGenerator.generate(4, {
       digits: true,
-      alphabets: false,
       upperCaseAlphabets: false,
       specialChars: false,
     });
 
-
     // Email Setup karna
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
+    // const transporter = nodemailer.createTransport({
+    //   service: "gmail",
+    //   auth: {
+    //     user: process.env.EMAIL_USER,
+    //     pass: process.env.EMAIL_PASS,
+    //   },
+    // });
 
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: 'Your OTP for Sign-Up',
-      text: `Your OTP is ${otp}`,
-    };
-   
-    await transporter.sendMail(mailOptions);
+    // const mailOptions = {
+    //   from: process.env.EMAIL_USER,
+    //   to: email,
+    //   subject: "Your OTP for Sign-Up",
+    //   text: `Your OTP is ${otp}`,
+    // };
+
+    // await transporter.sendMail(mailOptions);
 
     // Store OTP and user info in temporary storage
     // await storeOtpAndUserDetails({ name, email, otp });
     await setOtp(email, otp);
-
 
     return NextResponse.json(
       { message: "OTP sent successfully!" },
@@ -62,7 +52,10 @@ export async function POST(req: Request): Promise<NextResponse> {
   } catch (error: any) {
     console.log("Error in sending OTP:", error);
     return NextResponse.json(
-      { message: "Error", error: error.message || "An unexpected error occurred" },
+      {
+        message: "Error",
+        error: error.message || "An unexpected error occurred",
+      },
       { status: 500 }
     );
   }

@@ -5,7 +5,8 @@ import { IUser } from "@/types";
 export async function createUserWithAccount(
   name: string,
   email: string,
-  password: string
+  password: string,
+  imagePath: string
 ): Promise<void> {
   try {
     await dbConnect();
@@ -14,6 +15,7 @@ export async function createUserWithAccount(
       name,
       email,
       password,
+      image: imagePath,
     });
 
     await newUser.save();
@@ -45,7 +47,7 @@ export async function setOtp(email: string, otp: string): Promise<void> {
     if (!user) {
       throw new Error("User not found");
     }
-    if(user.isverified === true){
+    if (user.isverified === true) {
       throw new Error("User already verified");
     }
     //const isverified = await user.findOne{{}}
