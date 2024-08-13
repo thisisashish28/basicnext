@@ -1,9 +1,12 @@
-import dbConnect from "@/lib/dbConnect";
-import User, { IUser } from "@/models/User";
-import { v4 as uuidv4 } from "uuid";
+import dbConnect from "../utils/dbConnect";
+import User from "@/server/models/User";
+import { IUser } from "@/types";
 
-// Function to create a user with an account
-export async function createUserWithAccount({ name, email, password }: IUser): Promise<void> {
+export async function createUserWithAccount(
+  name: string,
+  email: string,
+  password: string
+): Promise<void> {
   try {
     await dbConnect();
     const newUser = new User({

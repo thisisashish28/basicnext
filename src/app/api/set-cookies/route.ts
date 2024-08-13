@@ -1,9 +1,7 @@
-import { NextResponse } from 'next/server';
-import { serialize } from 'cookie';
-import LogInInform from '@/models/LogInInform';
-import  dbConnect  from '@/lib/dbConnect';
-import { v4 as uuidv4 } from 'uuid';
-import User from "@/models/User";
+import { NextResponse } from "next/server";
+import dbConnect from "@/server/utils/dbConnect";
+import { v4 as uuidv4 } from "uuid";
+import session from "@/server/models/session";
 
 export async function POST(req: Request) {
   try {
@@ -11,43 +9,39 @@ export async function POST(req: Request) {
     const { email } = await req.json();
     const token = uuidv4();
 
-    // const user = await User.findOne({ email });
     if (!email) {
-      return NextResponse.json({ error: 'Token and email are required or the email you entered is not registered' }, { status: 400 });
+      return NextResponse.json(
+        {
+          error:
+            "Token and email are required or the email you entered is not registered",
+        },
+        { status: 400 }
+      );
     }
 
-    // Check if the document already exists
-    const existingLogInInform = await LogInInform.findOne({ email });
-    if (existingLogInInform) {
-      // Update token and reset the tokenCreatedAt field
-      existingLogInInform.loginToken = token;
-      existingLogInInform.tokenCreatedAt = new Date(); // Update the tokenCreatedAt to current time
-      await existingLogInInform.save();
+    const existingSession = await session.findOne({ email });
+    if (existingSession) {
+      existingSession.token = token;
+      existingSession.tokenCreatedAt = new Date();
+      await existingSession.save();
     } else {
-      // Create a new logInInform document
-      const logInInform = new LogInInform({
+      const newSession = new session({
         email,
-        loginToken: token,
-        tokenCreatedAt: new Date(), // Set this when the token is created
+        token: token,
+        tokenCreatedAt: new Date(),
       });
-      await logInInform.save();
+      await newSession.save();
     }
 
-    const cookie = serialize('customToken', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 3600, // Set cookie to expire in 1 hour
-      path: '/',
+    return new Response("Session Created", {
+      status: 200,
+      headers: { "Set-Cookie": `customToken=${token}` },
     });
-
-    console.log('Setting cookie:', cookie);
-    const response = NextResponse.json({ success: true, token, cookie });
-    response.headers.set('Set-Cookie', cookie);
-
-
-    return response;
   } catch (error) {
-    console.error('Error in POST handler:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    console.error("Error in POST handler:", error);
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }

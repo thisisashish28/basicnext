@@ -1,24 +1,21 @@
-import { createUserWithAccount, getUserByEmail } from "@/utils/users";
+import {
+  createUserWithAccount,
+  getUserByEmail,
+} from "@/server/controllers/users";
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 
 // Define the request body type
-interface RequestBody {
+type RequestBody = {
   name: string;
   email: string;
   password: string;
-}
-
-// Define the response type
-interface ResponseData {
-  message: string;
-  data?: any; // Adjust type as needed
-}
+};
 
 export const POST = async (req: Request): Promise<NextResponse> => {
   try {
     const { name, email, password }: RequestBody = await req.json();
-    console.log(name,email,password);
+    console.log(name, email, password);
     // Validate input
     if (!name || !email || !password) {
       return NextResponse.json(
@@ -44,11 +41,7 @@ export const POST = async (req: Request): Promise<NextResponse> => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Create the new user
-    await createUserWithAccount({
-      name,
-      email,
-      password: hashedPassword,
-    });
+    await createUserWithAccount(name, email, hashedPassword);
 
     return NextResponse.json(
       {
@@ -56,8 +49,8 @@ export const POST = async (req: Request): Promise<NextResponse> => {
       },
       { status: 201 }
     );
-  } catch (error:any) {
-    console.log("Error in POST handler:", error) ;
+  } catch (error: any) {
+    console.log("Error in POST handler:", error);
     return NextResponse.json(
       {
         message: "Error",
@@ -65,6 +58,6 @@ export const POST = async (req: Request): Promise<NextResponse> => {
       },
       { status: 500 }
     );
-   // console.log(error);
+    // console.log(error);
   }
 };
