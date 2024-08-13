@@ -12,9 +12,14 @@ const CreateAccount: React.FC = () => {
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
     const [error, setError] = useState<string>('');
+    const [otpDiv, setOtpDiv] = useState<boolean>(false);
+    const [verificationCode, setVerificationCode] = useState<boolean>(false);
+    const [otp, setOtp] = useState<string>('');
+    const [isOtpSent, setIsOtpSent] = useState<boolean>(false); // New state variable
+
     const router = useRouter();
 
-    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: ButtonEvent<HTMLButtonElement>) => {
         e.preventDefault();
         try {
             const response = await axios.post('/api/users', {
@@ -23,10 +28,53 @@ const CreateAccount: React.FC = () => {
                 password
             });
             console.log(response.data);
-            router.push('/');
+            if(response.data.message === 'User created'){
+                setOtpDiv(true);
+            }
         } catch (error: any) {
             if (error.response && error.response.status === 400) {
                 setError("Email already exists");
+            } else {
+                setError("An error occurred");
+            }
+        }
+    };
+
+    const handleSendOtp = async () => {
+        try {
+            const response = await axios.post('/api/generate-otp', {
+                email
+            });
+           console.log(response.data);
+            if(response.data.message === 'OTP sent successfully!'){
+                setVerificationCode(true);
+                setOtpDiv(false);
+                setIsOtpSent(true); // Set OTP sent state to true
+            }
+        } catch (error: any) {
+            if (error.response && error.response.status === 400) {
+                setError("Email already exists");
+            } else {
+                setError("An error occurred");
+            }
+        }
+    };
+
+    const handleVerificationCode = async (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        try {
+            const response = await axios.post('/api/verify-otp', {
+                email,
+                otp
+            });
+            if(response.data.message === 'User verified successfully!'){
+                setOtpDiv(false);
+                setVerificationCode(false);
+                router.push('/');
+            }
+        } catch (error: any) {
+            if (error.response && error.response.status === 400) {
+                setError("Invalid OTP");
             } else {
                 setError("An error occurred");
             }
@@ -53,7 +101,7 @@ const CreateAccount: React.FC = () => {
                                 <h2 className="text-2xl font-bold mb-md text-center">Create Account</h2>
                                 {error && <p className="text-red-500 text-center mb-md">{error}</p>}
                                 <div className='items-center mt-md'>
-                                    <form onSubmit={handleSubmit} className="space-y-md">
+                                    <form className="space-y-md">
                                         <div>
                                             <Label htmlFor='name' className="block text-sm font-medium text-gray-700">Name</Label>
                                             <Input
@@ -62,6 +110,7 @@ const CreateAccount: React.FC = () => {
                                                 value={name}
                                                 onChange={(e) => setName(e.target.value)}
                                                 required
+                                                readOnly={isOtpSent} // Make readonly if OTP is sent
                                                 className="mt-xs block w-full px-md py-sm border 
                                                 border-gray-300 rounded-md shadow-sm focus:outline-none 
                                                 focus:ring-secondary focus:border-secondary sm:text-sm"
@@ -75,6 +124,7 @@ const CreateAccount: React.FC = () => {
                                                 value={email}
                                                 onChange={(e) => setEmail(e.target.value)}
                                                 required
+                                                readOnly={isOtpSent} // Make readonly if OTP is sent
                                                 className="mt-xs block w-full px-md py-sm border border-gray-300 
                                                 rounded-md shadow-sm focus:outline-none focus:ring-secondary focus:border-secondary sm:text-sm"
                                             />
@@ -87,14 +137,37 @@ const CreateAccount: React.FC = () => {
                                                 value={password}
                                                 onChange={(e) => setPassword(e.target.value)}
                                                 required
+                                                readOnly={isOtpSent} // Make readonly if OTP is sent
                                                 className="mt-xs block w-full px-md py-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-secondary focus:border-secondary sm:text-sm"
                                             />
                                         </div>
-
                                         <Button className='w-full py-md px-lg bg-secondary border text-white 
                                         font-semibold rounded-md
                                         shadow-sm hover:bg-hover focus:outline-none focus:ring-2 
-                                        focus:ring-secondary focus:ring-offset-2'> Submit</Button>
+                                        focus:ring-secondary focus:ring-offset-2' onClick={handleSubmit} disabled={isOtpSent}> Submit</Button>
+                                    </form>
+                                    {otpDiv && <div>
+                                            <Button className='w-full py-md px-lg bg-secondary border text-white 
+                                        font-semibold rounded-md
+                                        shadow-sm hover:bg-hover focus:outline-none focus:ring-2 
+                                        focus:ring-secondary focus:ring-offset-2' onClick={handleSendOtp}>Send OTP</Button></div>}
+                                    <form onSubmit={handleVerificationCode}>
+                                        {verificationCode && <div>
+                                            <Label htmlFor='enterOtp' className="block text-sm font-medium text-gray-700">OTP</Label>
+                                            <Input
+                                                type="password"
+                                                id='enterOtp'
+                                                value={otp}
+                                                onChange={(e) => setOtp(e.target.value)}
+                                                required
+                                                className="mt-xs block w-full px-md py-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-secondary focus:border-secondary sm:text-sm"
+                                            />
+                                                </div>
+                                         }
+                                           {verificationCode && <Button type="submit" className='w-full py-md px-lg bg-secondary border text-white 
+                                        font-semibold rounded-md
+                                        shadow-sm hover:bg-hover focus:outline-none focus:ring-2 
+                                        focus:ring-secondary focus:ring-offset-2'>Verify OTP</Button>}
                                     </form>
                                 </div>
                             </div>
