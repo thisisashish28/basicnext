@@ -1,7 +1,10 @@
 import NextAuth from "next-auth";
-import { NextApiHandler } from "next";
 import { options } from "./options";
+import { NextRequest } from "next/server";
+import { RouteHandlerContext } from "@/types";
 
-const handler: NextApiHandler = NextAuth(options);
+const handler = async (req: NextRequest, context: RouteHandlerContext) => {
+  return NextAuth(req, context, options);
+};
 
 export { handler as GET, handler as POST };

@@ -3,10 +3,10 @@ import type { Config } from "tailwindcss";
 const config = {
   darkMode: ["class"],
   content: [
-    './pages/**/*.{ts,tsx}',
-    './components/**/*.{ts,tsx}',
-    './app/**/*.{ts,tsx}',
-    './src/**/*.{ts,tsx}',
+    "./pages/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    "./app/**/*.{ts,tsx}",
+    "./src/**/*.{ts,tsx}",
   ],
   prefix: "",
   theme: {
@@ -19,34 +19,34 @@ const config = {
     },
     extend: {
       colors: {
-        primary: '#ffffff', // Equivalent to bg-white
-        secondary: '#1E3A8A', // Example for blue
-        hover: '#1e90ff',
+        primary: "#ffffff",
+        secondary: "#1E3A8A",
+        hover: "#1e90ff",
       },
       spacing: {
-        'xs': '4px',
-        'sm': '8px',
-        'md': '16px',
-        'lg': '24px',
-        'xl': '32px',
-        '2xl': '40px',
-        '3xl': '48px',
-        '4xl': '64px',
-        '5xl': '80px',
-        '6xl': '96px',
-        '7xl': '128px',
+        xs: "4px",
+        sm: "8px",
+        md: "16px",
+        lg: "24px",
+        xl: "32px",
+        "2xl": "40px",
+        "3xl": "48px",
+        "4xl": "64px",
+        "5xl": "80px",
+        "6xl": "96px",
+        "7xl": "128px",
       },
       borderRadius: {
-        'xs': '4px',
-        'sm': '8px',
-        'md': '12px',
-        'lg': '16px',
-        'xl': '24px',
-        '2xl': '32px',
-        '3xl': '40px',
-        '4xl': '48px',
-        '5xl': '56px',
-        'full': '9999px', // For fully rounded corners
+        xs: "4px",
+        sm: "8px",
+        md: "12px",
+        lg: "16px",
+        xl: "24px",
+        "2xl": "32px",
+        "3xl": "40px",
+        "4xl": "48px",
+        "5xl": "56px",
+        full: "9999px", // For fully rounded corners
       },
       keyframes: {
         "accordion-down": {
